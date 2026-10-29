@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="这里是 wdfuare，一个新的开始。" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#f5f3ed" />
+    <title>wdfuare · 你好，世界</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: #242c25;
+        background: #f5f3ed;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header, footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin: 0 clamp(24px, 6vw, 96px);
+        padding: 28px 0;
+      }
+
+      header { border-bottom: 1px solid #d8dcd2; }
+      .wordmark { font-size: 22px; font-weight: 700; letter-spacing: -1px; }
+      .status { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #596351; }
+      .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #697a46; }
+
+      main {
+        flex: 1;
+        display: grid;
+        align-content: center;
+        justify-items: start;
+        padding: 80px clamp(24px, 6vw, 96px) 100px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .eyebrow { font-size: 12px; letter-spacing: 3px; color: #70775f; margin: 0 0 24px; }
+      h1 { margin: 0; font-size: clamp(54px, 10vw, 148px); font-weight: 500; letter-spacing: -0.06em; line-height: 1.15; }
+      .description { margin: 32px 0 0; color: #69705f; font-size: clamp(16px, 2vw, 21px); line-height: 1.9; }
+      .note { margin: 12px 0 0; color: #7a806e; font-size: 14px; line-height: 1.8; }
+
+      .asterisk {
+        position: absolute;
+        right: 8vw;
+        bottom: 55px;
+        font-size: clamp(120px, 23vw, 320px);
+        line-height: 0.8;
+        color: #dce1cc;
+        font-family: Georgia, serif;
+        z-index: -1;
+        user-select: none;
+      }
+
+      footer { border-top: 1px solid #d8dcd2; color: #7a806e; font-size: 12px; }
+
+      @media (max-width: 600px) {
+        header, footer { padding: 22px 0; }
+        main { padding-top: 88px; padding-bottom: 140px; }
+        .asterisk { right: 25px; bottom: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="wordmark">wdfuare.</span>
+      <span class="status">即将上线</span>
+    </header>
+    <main>
+      <p class="eyebrow">A NEW BEGINNING</p>
+      <h1>你好，世界。</h1>
+      <p class="description">这里是 wdfuare。一个新的开始。</p>
+      <p class="note">更多内容，慢慢呈现。</p>
+      <span class="asterisk" aria-hidden="true">✳</span>
+    </main>
+    <footer>
+      <span>© 2026 wdfuare</span>
+      <span>wdfuare.com</span>
+    </footer>
+  </body>
+</html>
