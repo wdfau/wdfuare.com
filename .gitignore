@@ -3,6 +3,11 @@
 .env.*
 !.env.example
 node_modules/
+dist/
+output/
+.playwright-cli/
+*.tsbuildinfo
 *.log
 .aws/
 .codex/
+.tmp.driveupload/
