@@ -1,16 +1,202 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#b8d9e2" />
-    <meta name="description" content="一座可点击探索的治愈系作品岛：作品展庭、设计手作坊、交互花园与关于联系空间。" />
-    <link rel="icon" href="/model-icon.svg" type="image/svg+xml" />
-    <title>微光作品岛 · 3D 模型</title>
-    <style>html,body{margin:0;height:100%;background:#b8d9e2;color:#3b5e5b;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}.initial-model{height:100%;display:grid;place-content:center;text-align:center;gap:15px}.initial-model h1{font-size:24px;font-weight:400;letter-spacing:3px;margin:0}.initial-model p{font-size:11px;color:#6b8883;letter-spacing:1px;margin:0}</style>
-  </head>
-  <body>
-    <div id="root"><div class="initial-model"><h1>微光作品岛</h1><p>正在准备 3D 模型…</p><noscript><p>此模型需要启用 JavaScript 和 WebGL。</p></noscript></div></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05071a" />
+  <title>June · UI/UX 设计作品集 | wdfuare.com</title>
+  <meta name="description" content="June 的 UI/UX 设计作品集：一张可以飞行浏览的 3D 设计画布。包含 Cursor 界面易用性改进案例、过程记录、动效实验和联系方式。" />
+  <meta property="og:title" content="June · UI/UX 设计作品集" />
+  <meta property="og:description" content="一张可以飞行浏览的 3D 设计画布。设计，也把交互用代码做出来。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://wdfuare.com/" />
+  <link rel="canonical" href="https://wdfuare.com/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>html,body{margin:0;background:#05071a}</style>
+</head>
+<body>
+  <div id="stage" aria-hidden="true"></div>
+  <div id="labels"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="wdfuare.com 首页">WDFUARE<span>.com</span></a>
+    <div class="actions">
+      <button class="btn" id="btn-overview" type="button" aria-pressed="false">总览<kbd>Tab</kbd></button>
+    </div>
+  </header>
+
+  <nav id="nav" aria-label="区块导航"></nav>
+
+  <section id="hero">
+    <div class="en">Portfolio · 2026 · UI/UX</div>
+    <h1>你好，我是 <span class="hl">June</span><br />让界面动起来</h1>
+    <p>UI/UX 设计实习生，求职中。<br />从画板到能点的原型，我都自己做。</p>
+    <div class="hero-row">
+      <button class="cta" id="hero-cta" type="button">看作品 →</button>
+      <span class="hint"><span class="hint-desktop">点左边导航、滚动，或按 Tab 看全貌</span><span class="hint-touch">上下滑动，或点下方导航</span></span>
+    </div>
+  </section>
+
+  <aside id="panel" aria-live="polite" aria-hidden="true">
+    <div class="en"></div>
+    <h2></h2>
+    <p></p>
+    <a class="more" href="#" hidden></a>
+  </aside>
+
+  <div class="foot">© 2026 June · wdfuare.com</div>
+  <div id="toast" role="status"></div>
+  <div id="loader"><div class="en">Loading canvas…</div></div>
+
+  <!-- ===== Case 01 ===== -->
+  <div id="case" class="case" role="dialog" aria-modal="true" aria-labelledby="case-title" hidden>
+    <div class="case-progress"></div>
+    <button class="case-close" type="button" data-close aria-label="关闭案例，回到画布">✕</button>
+    <div class="case-scroll">
+      <header class="case-cover">
+        <div class="en reveal">Case 01 · UX 分析 · 2026.11</div>
+        <h1 id="case-title" class="reveal">Cursor 界面易用性改进</h1>
+        <p class="lead reveal">一名初级设计师想用 Cursor 做设计初稿，却在两处卡住：开始时选不对入口，修改时选不准对象。这篇拆解问题出在哪，以及可以怎么改。</p>
+        <dl class="meta reveal">
+          <div><dt>类型</dt><dd>课程作业 · 体验分析</dd></div>
+          <div><dt>时间</dt><dd>2026.11</dd></div>
+          <div><dt>方法</dt><dd>使用反馈 · 截图分析 · 官方文档核对</dd></div>
+          <div><dt>范围</dt><dd>入口选择 · 画布对象选择</dd></div>
+        </dl>
+      </header>
+
+      <article class="case-body">
+        <section class="reveal">
+          <div class="en">01 — Background</div>
+          <h2>背景与问题</h2>
+          <p>想象你是一名初级设计师，想用 Cursor 看看团队现有的设计、找点灵感，再做一份初稿。任务可能是一套伴手礼、一张海报、一张流程图，或一个简单页面。</p>
+          <p>进入软件后，你不知道该选哪个入口。打开本地文件夹、输入需求后，AI 开始建立 Git 仓库、搭建环境。你不清楚自己为什么进了这条流程，也不知道它和这次设计任务有什么关系。</p>
+          <p>开始修改设计后，又遇到另一类困难：在这次使用的画布里，主要靠按住鼠标拖动、涂画来标记位置，很难逐层找到想改的对象。AI 有时还会改到不需要改的内容。</p>
+          <div class="callout"><b>本案例聚焦两件事</b>开始时，能不能选到符合预期的入口；修改时，能不能准确选中目标，并看清 AI 将修改的范围。</div>
+        </section>
+
+        <section class="reveal">
+          <div class="en">02 — User</div>
+          <h2>用户</h2>
+          <p>想用 AI 提升效率、熟悉设计软件、但不熟悉开发流程的初级设计师。他们有基本的视觉判断力，愿意用对话表达需求，也愿意在初稿上自己动手改。</p>
+          <p class="note">材料说明：依据使用者反馈、当前操作截图与官方功能说明整理。没有开展多用户访谈、方案原型测试或上线效果验证。</p>
+        </section>
+
+        <section class="reveal">
+          <div class="en">03 — Problem 1</div>
+          <h2>问题一：入口选择不清晰</h2>
+          <p>用户想做的是：让 AI 理解现有设计，给出想法，再开始做初稿。他首先关心创作目标，而不是先决定代码仓库、开发环境或版本管理。</p>
+          <p>实际情况是：开始任务时，没有找到清楚对应设计用途的入口。之后出现了建立 Git 仓库、搭建环境等操作。这超出了用户的预期，用户也不认为这是自己主动选的。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>需要判断的事</th><th>这次体验中的困难</th></tr></thead>
+            <tbody>
+              <tr><td>入口是否适合我</td><td>看到了入口，但不清楚哪个对应当前的设计任务。</td></tr>
+              <tr><td>选择后会发生什么</td><td>难以预判会直接进入设计创作，还是进入仓库相关流程。</td></tr>
+              <tr><td>文件将怎样管理</td><td>不清楚这次任务需要 Git，还是普通文件夹就够。</td></tr>
+            </tbody>
+          </table></div>
+          <p>用户在开始创作前，就要花精力猜入口的含义。进入非预期流程后，又要判断继续、返回还是重来。理解和纠正的成本都变高了。</p>
+          <div class="callout"><b>问题归纳</b>入口没有帮用户建立清楚的操作预期，用户难以主动选择适合当前任务的工作方式。</div>
+          <p class="note">事实边界：官方入门允许直接打开本地文件夹 <a href="#ref-1">[1]</a>；名为 Projects 的功能采用云端仓库流程 <a href="#ref-2">[2]</a>。本案例不认定所有任务都必须用 Git，也没有确定本次具体由哪个入口或设置触发了仓库操作。</p>
+        </section>
+
+        <section class="reveal">
+          <div class="en">04 — Problem 2</div>
+          <h2>问题二：画布选择不准确</h2>
+          <p>用户想做的是：在已经生成的初稿里，只改一块内容。比如只调整一个流程节点的文字，保留其他节点和连线。</p>
+          <div class="figures">
+            <figure><img src="/cases/cursor/figure-1.png" alt="Cursor 画布中的 CDK 兑换流程图，整张图作为一个整体被选中" loading="lazy" width="1367" height="1177" /><figcaption>图 1　整体内容被选中的状态</figcaption></figure>
+            <figure><img src="/cases/cursor/figure-2.png" alt="同一张流程图上，用紫色笔迹反复涂画来标记想修改的大致位置" loading="lazy" width="1365" height="1175" /><figcaption>图 2　通过涂画标记大致位置</figcaption></figure>
+          </div>
+          <p class="note">图片由使用者提供，只裁取相关区域。截图用于说明选择与标记方式；"AI 改了无关内容"来自使用者反馈，图片本身不展示修改前后的结果。</p>
+          <ol class="steps">
+            <li><b>位置是模糊的。</b>拖动、涂画表达的是大致位置，用户难以确认当前到底选中了哪个对象。</li>
+            <li><b>层级不好认。</b>整张图、内部节点和文字之间的层级不容易分辨，定位局部内容要反复尝试。</li>
+            <li><b>改动会越界。</b>选区和实际修改范围不一致时，用户要额外检查、恢复无关的改动。</li>
+          </ol>
+          <div class="callout"><b>问题归纳</b>用户难以准确指定修改目标，也难以判断自己的选择会怎样约束 AI 的实际改动。</div>
+          <p class="note">产品边界：Cursor 已有 Canvases <a href="#ref-3">[3]</a>。官方说明，浏览器中的 Design Mode 支持点选、多选、框选和父子层级切换，Canvas 标签页的行为又有所不同 <a href="#ref-4">[4]</a>。这里研究的是本次画布中的操作困难，不把它概括为整个产品缺少选择能力。</p>
+        </section>
+
+        <section class="reveal">
+          <div class="en">05 — Solution 1</div>
+          <h2>改进一：把入口用途说明白</h2>
+          <p>让用户在开始对话前就知道该选哪里，以及选了之后会进入什么工作方式。</p>
+          <h3>让用途选择更容易发现</h3>
+          <p>把用途选择放在新建任务时容易看到的位置，避免进了一条流程才发现不合适。角色可以帮助理解，但更要让用户说出这次要做什么：做海报、整理流程图、做页面初稿，还是开发功能。</p>
+          <h3>用任务描述解释入口</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>需要呈现的信息</th><th>建议表达的内容</th></tr></thead>
+            <tbody>
+              <tr><td>适合什么任务</td><td>用普通语言说明能在这里完成哪些事，帮用户对照自己的目的。</td></tr>
+              <tr><td>进入后先做什么</td><td>说明是先看和改视觉初稿，还是先处理已有代码和开发环境。</td></tr>
+              <tr><td>是否涉及仓库</td><td>说清是否用 Git、是否连接远程仓库；需要时解释理由。</td></tr>
+              <tr><td>当前选择是什么</td><td>进入后保留清楚的用途提示，并提供好找的返回或切换入口。</td></tr>
+            </tbody>
+          </table></div>
+          <h3>让选择和后续行为一致</h3>
+          <p>用户选了设计创作，后续操作就应围绕这次设计任务。如果确实需要切到代码开发或仓库操作，先说明变化和原因。这不等于删掉仓库能力，重点是让这些行为有清楚的说明，并符合用户的选择。</p>
+          <h3>代价</h3>
+          <p>直接解释任务和后续行为，比只加一个职业标签更能帮用户判断。代价是开始时可能多一次选择，所以应允许熟练用户跳过，或沿用上次的选择。</p>
+          <div class="callout good"><b>期望变化</b>用户在输入需求前，能说清自己为什么选这个入口，以及接下来大致会发生什么。</div>
+        </section>
+
+        <section class="reveal">
+          <div class="en">06 — Solution 2</div>
+          <h2>改进二：让修改目标明确可见</h2>
+          <p>提供清楚的对象选择和范围反馈，减少 AI 对非目标内容的改动。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>操作方式</th><th>适合的情况</th><th>需要看到的反馈</th></tr></thead>
+            <tbody>
+              <tr><td>点选</td><td>改一个节点、一段文字或一个元素。</td><td>高亮对应对象，显示它的名称或内容摘要。</td></tr>
+              <tr><td>框选</td><td>一次改多个对象。</td><td>高亮实际包含的对象，而不是一个含糊的范围。</td></tr>
+              <tr><td>逐层选择</td><td>整体里还有分组、节点或文字。</td><td>能从整体进入分组和具体元素，看清当前层级。</td></tr>
+            </tbody>
+          </table></div>
+          <p>先让已有的选择能力更好发现、更好用，再判断是否要补功能。涂画可以保留，作为说明位置、表达意图的辅助。</p>
+          <h3>提交前，看得见选中了什么</h3>
+          <p>在输入修改要求的位置，同时显示当前选中的对象和范围，比如"已选中：校验卡密节点"，并在画布上持续高亮。用户可以增减对象或取消选择，再提交。</p>
+          <h3>实际改动和选择对应</h3>
+          <p>把选中的对象和文字要求一起交给 AI，并在结果里标出实际改动。只加一个选中框不能保证 AI 只改局部，还需要系统识别对象、传递范围，并检查改动是否超出用户意图。</p>
+          <h3>代价</h3>
+          <p>层级太深、工具太多也会增加负担。所以常用的点选和框选要好找，层级信息按需展开。普通图片不一定有可编辑的图层，这是方案的边界。</p>
+          <div class="callout good"><b>期望变化</b>用户改之前能确认目标，改之后能看出变化；无关改动更少，检查和恢复的负担更低。</div>
+        </section>
+
+        <section class="reveal">
+          <div class="en">07 — Validation</div>
+          <h2>怎样判断改进是否有效</h2>
+          <p>下面是后续可以检验的标准，不是已经取得的结果。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>对应问题</th><th>可以观察的行为</th></tr></thead>
+            <tbody>
+              <tr><td>入口选择不清晰</td><td>能否独立找到适合任务的入口；能否说清下一步会发生什么；是否误入流程再返回重选。</td></tr>
+              <tr><td>画布选择不准确</td><td>能否选中指定对象；要重选几次；提交前是否理解修改范围；AI 的改动是否涉及非目标内容。</td></tr>
+            </tbody>
+          </table></div>
+          <p class="note">尚未确定：完整的首次进入路径、客户端版本和配置，仓库操作的具体触发原因；也没有 AI 误改的前后对比、方案原型或测试数据。所以本稿呈现的是使用反馈、问题分析和改进假设，不主张已经证明了改善效果。</p>
+        </section>
+
+        <section class="reveal refs">
+          <div class="en">Sources</div>
+          <h2>资料来源</h2>
+          <p class="note">官方资料用于核对已有功能和不同操作环境的差异；体验困难依据使用者反馈。查询日期：2026 年 11 月 1 日。</p>
+          <ol>
+            <li id="ref-1"><a href="https://cursor.com/help/getting-started/first-project" target="_blank" rel="noopener">Cursor Help：Your first project</a>　打开本地文件夹与启动 Agent 的基础路径。</li>
+            <li id="ref-2"><a href="https://cursor.com/docs/agent/projects" target="_blank" rel="noopener">Cursor Docs：Projects</a>　Projects 的云端工作方式及仓库选择。</li>
+            <li id="ref-3"><a href="https://cursor.com/docs/agent/tools/canvas" target="_blank" rel="noopener">Cursor Docs：Canvases</a>　内置画布的展示、打开和迭代方式。</li>
+            <li id="ref-4"><a href="https://cursor.com/docs/agent/design-mode" target="_blank" rel="noopener">Cursor Docs：Design Mode</a>　浏览器中的对象选择方式，以及 Canvas 标签页的不同行为。</li>
+          </ol>
+        </section>
+
+        <footer class="case-end reveal">
+          <button class="cta" type="button" data-close>← 回到画布</button>
+          <span class="note">下一个案例正在整理。</span>
+        </footer>
+      </article>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>
