@@ -28,7 +28,7 @@ document.getElementById('stage').appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2('#05071a', 0.0065);
 const FOV = 40;
-const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.5, 1000);
 const TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 
 let seed = 5;
@@ -113,7 +113,8 @@ function card(zone, { w, h, tex, at, rotY = 0, rotZ = 0, glow = '#7c8cff', r = 0
   halo.position.z = -0.05; g.add(halo);
   const edge = new THREE.Mesh(roundedRect(w + 0.07, h + 0.07, r + 0.035), new THREE.MeshBasicMaterial({ color: glow, transparent: true, opacity: 0.45 }));
   edge.position.z = -0.01; g.add(edge);
-  const face = new THREE.Mesh(roundedRect(w, h, r), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, color: dim ? '#9aa0c0' : '#ffffff' }));
+  // 卡面和身后的描边只差 0.01，总览时离得远，深度精度不够会互相抢（闪）。polygonOffset 让卡面永远在前。
+  const face = new THREE.Mesh(roundedRect(w, h, r), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, color: dim ? '#9aa0c0' : '#ffffff', polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8 }));
   g.add(face);
   g.position.copy(at); g.rotation.set(0, rotY, rotZ);
   scene.add(g);
