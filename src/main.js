@@ -28,7 +28,8 @@ document.getElementById('stage').appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2('#05071a', 0.0065);
 const FOV = 40;
-const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.1, 1000);
+// near 设大一点，远处的深度更准，总览时卡片不会闪。
+const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.5, 1000);
 const TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 
 let seed = 5;
@@ -109,10 +110,13 @@ const glowTex = makeGlowTexture();
 const cards = [];
 function card(zone, { w, h, tex, at, rotY = 0, rotZ = 0, glow = '#7c8cff', r = 0.28, dim = false, caseId = null, soon = false }) {
   const g = new THREE.Group();
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(w * 2, h * 2), new THREE.MeshBasicMaterial({ map: glowTex, color: glow, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
-  halo.position.z = -0.05; g.add(halo);
-  const edge = new THREE.Mesh(roundedRect(w + 0.07, h + 0.07, r + 0.035), new THREE.MeshBasicMaterial({ color: glow, transparent: true, opacity: 0.45 }));
-  edge.position.z = -0.01; g.add(edge);
+  // 光晕和描边贴在卡片背后。离得远时它们和卡片抢深度会闪，
+  // 所以不写深度，并用 polygonOffset 把它们稳稳推到卡片后面。
+  const behind = { depthWrite: false, polygonOffset: true, polygonOffsetFactor: 4, polygonOffsetUnits: 16 };
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(w * 2, h * 2), new THREE.MeshBasicMaterial({ map: glowTex, color: glow, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, ...behind }));
+  halo.position.z = -0.08; g.add(halo);
+  const edge = new THREE.Mesh(roundedRect(w + 0.07, h + 0.07, r + 0.035), new THREE.MeshBasicMaterial({ color: glow, transparent: true, opacity: 0.45, ...behind }));
+  edge.position.z = -0.03; g.add(edge);
   const face = new THREE.Mesh(roundedRect(w, h, r), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, color: dim ? '#9aa0c0' : '#ffffff' }));
   g.add(face);
   g.position.copy(at); g.rotation.set(0, rotY, rotZ);
