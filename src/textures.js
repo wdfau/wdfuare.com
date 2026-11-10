@@ -67,7 +67,7 @@ export function makeUITexture({ w = 640, h = 420, variant = 'web', accent = '#7c
 }
 
 // 案例卡封面：标题 + 截图缩略图。图片加载完再补画上去。
-export function makeCaseTexture({ label, title, sub, image, accent = '#a78bfa', accent2 = '#7dd3fc', dim = false }) {
+export function makeCaseTexture({ label, title, sub, image, accent = '#a78bfa', accent2 = '#7dd3fc', dim = false, cta = '打开案例 →' }) {
   const w = 1024, h = 672;
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
@@ -89,7 +89,7 @@ export function makeCaseTexture({ label, title, sub, image, accent = '#a78bfa', 
     g.fillStyle = dim ? 'rgba(232,236,255,0.1)' : l;
     g.beginPath(); g.roundRect(60, h - 130, dim ? 200 : 210, 62, 31); g.fill();
     g.fillStyle = dim ? 'rgba(232,236,255,0.55)' : '#0b1030'; g.font = `700 24px ${FONT_ZH}`;
-    g.fillText(dim ? '整理中 · Soon' : '打开案例 →', 88, h - 90);
+    g.fillText(dim ? '整理中 · Soon' : cta, 88, h - 90);
     if (img) {
       const bx = w * 0.56, by = 120, bw = w * 0.38, bh = h - 220;
       g.save(); g.beginPath(); g.roundRect(bx, by, bw, bh, 20); g.clip();

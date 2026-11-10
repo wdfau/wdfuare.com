@@ -6,7 +6,7 @@ export const isCompact = () => matchMedia('(max-width: 760px)').matches || inner
 
 export const ZONES = [
   { id: 'home', num: '01', name: '首页', en: 'Home' },
-  { id: 'work', num: '02', name: '作品', en: 'Work', desc: '精选案例。点开卡片，能看到完整的问题、分析和改进思路。', action: { label: '打开 Case 01 →', type: 'case', id: 'cursor' } },
+  { id: 'work', num: '02', name: '作品', en: 'Work', desc: '作品正在整理，很快上线。' },
   { id: 'process', num: '03', name: '过程', en: 'Process', desc: '从观察、拆解到推敲的过程记录。更多过程稿正在整理。' },
   { id: 'play', num: '04', name: '实验', en: 'Playground', desc: '动效和前端小实验。移动鼠标或手指，旁边的物件会跟着转。这个网站本身也是一次实验。' },
   { id: 'about', num: '05', name: '关于', en: 'About', desc: '我是 June，正在找 UI/UX 设计实习。我做设计，也用代码把交互做出来。' },

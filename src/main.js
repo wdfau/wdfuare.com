@@ -3,7 +3,6 @@ import './style.css';
 import * as THREE from 'three';
 import { ZONES, Rig, setupUI, isCompact, toast } from './ui.js';
 import { makeUITexture, makeCaseTexture, makeContactTexture, makeGlowTexture, makeDotTexture, roundedRect } from './textures.js';
-import { setupCase } from './case.js';
 
 const V = THREE.Vector3;
 const compactAtStart = isCompact();
@@ -12,12 +11,9 @@ let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 } catch {
-  // 不支持 3D：直接把案例当普通网页展示。
+  // 不支持 3D：只保留首页文字。
   document.body.classList.add('no-webgl');
   document.getElementById('loader').classList.add('done');
-  const el = document.getElementById('case');
-  el.hidden = false;
-  el.classList.add('is-open', 'is-ready', 'static');
   throw new Error('WebGL unavailable');
 }
 renderer.setPixelRatio(Math.min(devicePixelRatio, compactAtStart ? 1.5 : 2));
@@ -108,7 +104,7 @@ const glassMat = (a = '#a78bfa', b = '#7dd3fc') => new THREE.ShaderMaterial({
 // ---------- 卡片 ----------
 const glowTex = makeGlowTexture();
 const cards = [];
-function card(zone, { w, h, tex, at, rotY = 0, rotZ = 0, glow = '#7c8cff', r = 0.28, dim = false, caseId = null, soon = false }) {
+function card(zone, { w, h, tex, at, rotY = 0, rotZ = 0, glow = '#7c8cff', r = 0.28, dim = false, soon = false }) {
   const g = new THREE.Group();
   // 光晕和描边贴在卡片背后。离得远时它们和卡片抢深度会闪，
   // 所以不写深度，并用 polygonOffset 把它们稳稳推到卡片后面。
@@ -121,7 +117,7 @@ function card(zone, { w, h, tex, at, rotY = 0, rotZ = 0, glow = '#7c8cff', r = 0
   g.add(face);
   g.position.copy(at); g.rotation.set(0, rotY, rotZ);
   scene.add(g);
-  const c = { g, face, halo, edge, zone, w, h, base: at.clone(), rotY, rotZ, phase: rand() * 6, hover: 0, frozen: false, caseId, soon, dim };
+  const c = { g, face, halo, edge, zone, w, h, base: at.clone(), rotY, rotZ, phase: rand() * 6, hover: 0, frozen: false, soon, dim };
   face.userData.card = c;
   cards.push(c);
   return c;
@@ -152,10 +148,10 @@ hero.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeo
 scene.add(hero);
 extras.home.push([hero.position, 2.2]);
 
-// 02 作品：Case 01 是真案例，另外两张在整理中
-const caseCard = card('work', {
-  w: 8, h: 5.25, at: at('work', -1.5, 0.4, 1.2), glow: '#a78bfa', caseId: 'cursor',
-  tex: makeCaseTexture({ label: 'CASE 01 · UX 分析', title: 'Cursor 界面\n易用性改进', sub: '入口选择 · 画布对象选择', image: '/cases/cursor/figure-2.png' }),
+// 02 作品：三张都在整理中
+card('work', {
+  w: 8, h: 5.25, at: at('work', -1.5, 0.4, 1.2), glow: '#a78bfa', soon: true,
+  tex: makeCaseTexture({ label: 'CASE 01', title: '作品整理中', sub: '很快上线', cta: '整理中 · Soon' }),
 });
 card('work', { w: 4.4, h: 2.9, at: at('work', 6.4, 1.75, -0.8), rotY: -0.16, glow: '#6b7bd6', dim: true, soon: true, tex: makeCaseTexture({ label: 'CASE 02', title: '下一个案例', sub: '正在整理', dim: true }) });
 card('work', { w: 4.4, h: 2.9, at: at('work', 6.4, -1.65, -0.8), rotY: -0.16, glow: '#6b7bd6', dim: true, soon: true, tex: makeCaseTexture({ label: 'CASE 03', title: '下一个案例', sub: '正在整理', dim: true }) });
@@ -257,8 +253,7 @@ function computeViews() {
 computeViews();
 
 const rig = new Rig(camera, 1.1);
-const caseView = setupCase({ rig, camera, renderer, getCard: id => cards.find(c => c.caseId === id), getUI: () => nav, returnView: () => views.work, TAN });
-const nav = setupUI({ rig, views, onAction: a => { if (a.type === 'case') caseView.open(a.id); } });
+const nav = setupUI({ rig, views });
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
@@ -286,8 +281,7 @@ renderer.domElement.addEventListener('click', e => {
   if (nav.locked) return;
   const c = pick(e.clientX, e.clientY);
   if (!c) return;
-  if (c.caseId) caseView.open(c.caseId);
-  else if (c.soon) toast('这个案例还在整理中');
+  if (c.soon) toast('这个作品还在整理中');
   else if (c.href && nav.current === c.zone) open(c.href, '_blank', 'noopener');
   else if (c.zone !== nav.current) nav.go(c.zone);
 });
@@ -306,7 +300,7 @@ function frame() {
   if (frameNo++ % 3 === 0 && !rig.flying && !nav.locked) {
     ray.setFromCamera(ndc, camera);
     hovered = ray.intersectObjects(faces, false)[0]?.object.userData.card ?? null;
-    const clickable = hovered && (hovered.caseId || hovered.soon || hovered.zone !== nav.current || hovered.href);
+    const clickable = hovered && (hovered.soon || hovered.zone !== nav.current || hovered.href);
     renderer.domElement.style.cursor = clickable ? 'pointer' : '';
   }
   for (const c of cards) {
@@ -344,5 +338,4 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
   const zone = location.hash.slice(1);
   if (zone === 'overview') nav.toggleOverview(true);
   else if (ZONES.some(z => z.id === zone)) nav.go(zone, { instant: true });
-  caseView.openFromHash();
 }));
