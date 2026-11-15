@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-/* Quota Board · Mac 宣传页
+/* Quota Board · 产品页
    配色与字号参照 apple.com 与 macOS 系统控件：白 / #f5f5f7 交替分区，#1d1d1f 正文，#0071e3 主按钮。 */
 :root {
   --bg: #ffffff;
@@ -40,14 +40,14 @@ img { display: block; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; flex-shrink: 0; }
 
 /* ---------- 顶栏 ---------- */
-.site-header { height: var(--header-h); padding: 0 max(22px, calc((100% - 1180px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 24px; position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,.8); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); }
+.site-header { height: var(--header-h); padding: 0 max(22px, calc((100% - 1180px) / 2)); display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,.8); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); }
+.site-header > .wordmark { justify-self: start; }
 .wordmark { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
 .app-icon { width: 28px; height: 28px; }
-.wordmark-suffix { margin-left: 2px; padding-left: 12px; border-left: 1px solid var(--line); font-size: 13px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
 .site-header nav { display: flex; gap: 32px; font-size: 14px; }
 .site-header nav a { color: rgba(29,29,31,.8); transition: color .2s; }
 .site-header nav a:hover { color: var(--ink); }
-.header-download { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; padding: 7px 15px; border-radius: 980px; background: var(--blue); color: #fff; transition: background .2s; white-space: nowrap; }
+.header-download { justify-self: end; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; padding: 7px 15px; border-radius: 980px; background: var(--blue); color: #fff; transition: background .2s; white-space: nowrap; }
 .header-download:hover { background: #0077ed; }
 
 /* ---------- 首屏 ---------- */
@@ -67,8 +67,6 @@ img { display: block; }
 .text-link { font-size: 17px; color: var(--link); }
 .text-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .down-arrow { display: inline-block; margin-left: 6px; }
-.hero-meta { font-size: 14px; color: var(--ink-3); margin: 20px 0 0; }
-.hero-meta span { margin: 0 8px; }
 
 /* ---------- 功能演示：只看屏幕右上角，按章节自动播放 ---------- */
 .story { position: relative; }
@@ -376,9 +374,8 @@ summary::-webkit-details-marker { display: none; }
 }
 @media (max-width: 760px) {
   :root { --header-h: 52px; }
-  .site-header { padding-inline: 18px; gap: 10px; }
+  .site-header { grid-template-columns: 1fr auto; padding-inline: 18px; gap: 10px; }
   .wordmark { font-size: 16px; }
-  .wordmark-suffix { font-size: 12px; padding-left: 9px; }
   .site-header nav { display: none; }
   .header-download { font-size: 13px; padding: 6px 12px; }
   .hero { padding: 56px 20px 32px; }
@@ -387,7 +384,6 @@ summary::-webkit-details-marker { display: none; }
   .hero-description { font-size: 17px; }
   .desktop-break { display: none; }
   .hero-actions { flex-direction: column; gap: 18px; margin-top: 28px; }
-  .hero-meta { font-size: 13px; }
 
   .story-stage { --frame-w: 100%; padding: 16px 16px 64px; }
   .story-heading { display: block; min-height: 146px; margin-bottom: 16px; }
@@ -439,7 +435,6 @@ summary::-webkit-details-marker { display: none; }
   .download-meta { font-size: 12px; }
 }
 @media (max-width: 360px) {
-  .wordmark-suffix { display: none; }
   .story-stage { padding-inline: 12px; }
   .hero h1 { font-size: 38px; }
 }
