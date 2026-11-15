@@ -40,7 +40,7 @@
     { label: '账号详情', title: 'Every account, in full.', description: '点进一个平台，比较不同账号的额度窗口<br>剩余百分比与重置时间，一起看', progress: .32 },
     { label: '账号管理', title: 'Name it. Know it.', description: '打开设置，给账号一个熟悉的名字<br>邮箱保留，用来核对身份', progress: .56 },
     { label: '同步更新', title: 'Rename once. See it everywhere.', description: '保存后，总览与详情同步显示新名称<br>一个名字，处处认得' },
-    { label: '切换账号', title: 'Double-click to switch.', description: '在详情里双击另一个账号，确认后即可切换<br>现在，也可以点击界面自己试试' }
+    { label: '切换账号', title: 'Double-click to switch.', description: '' }
   ];
   // Switch notes are the ones the Mac app shows in its own switch prompt.
   const switchNotes = { codex: 'Codex 会退出并重新打开', kiro: '将在终端打开此账号的 Kiro CLI 会话', cursor: '将打开此账号对应的 Cursor 窗口', claude: '将在终端打开此账号的 Claude Code 会话', copilot: '将此账号设为 GitHub CLI 的当前账号' };
@@ -686,12 +686,12 @@
   }
   // Dot field behind the whole page: React Bits DotGrid (dotgrid.js), tuned for the light Apple palette.
   if (window.createDotGrid) {
+    const demoText = '.story-heading-main, #chapter-description, .demo-note, .chapter-controls, .demo-mode-controls, .story-scroll-hint';
     window.createDotGrid($('.page-dots'), {
       dotSize: 4, gap: 14, baseColor: '#c7c7cc', activeColor: '#0071e3',
       proximity: 140, shockRadius: 320, shockStrength: 5, returnDuration: 0.8,
-      // Below the hero, no dots are drawn right under text and interface, so nothing gets hard to read.
-      // Every dot that is drawn reacts to the mouse, right up to the edge of the text.
-      quiet: '.story-heading-main, #chapter-description, .screen-corner, .chapter-controls, .demo-mode-controls, .story-scroll-hint, .quiet-section > .section-kicker, .quiet-section > h2, .bento > article, .setup-copy, .setup-preview-wrap, .support-header > *, .provider-marquee, .marquee-note, .support-details, .site-footer > *',
+      quiet: demoText + ', .screen-corner, .quiet-section > .section-kicker, .quiet-section > h2, .bento > article, .setup-copy, .setup-preview-wrap, .support-header > *, .provider-marquee, .marquee-note, .support-details, .site-footer > *',
+      quietSoft: demoText,
       quietWhole: '.screen-corner, .provider-marquee'
     });
   }

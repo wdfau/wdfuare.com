@@ -70,12 +70,13 @@ img { display: block; }
 
 /* ---------- 功能演示：只看屏幕右上角，按章节自动播放 ---------- */
 .story { position: relative; }
-.story-stage { --frame-w: min(100%, 1180px); padding: 32px 5% 96px; display: flex; flex-direction: column; align-items: center; }
+.story-stage { --frame-w: min(100%, clamp(760px, calc((100svh - 264px) * 719 / 395), 1180px)); padding: 32px 5% 96px; display: flex; flex-direction: column; align-items: center; }
 .story-heading { width: var(--frame-w); display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin: 0 0 24px; min-height: 92px; }
 .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--ink-3); }
 .eyebrow-line { height: 1px; width: 24px; background: var(--line); }
 .story-heading h2 { font-size: 40px; font-weight: 700; letter-spacing: -.01em; line-height: 1.15; margin: 10px 0 0; }
 .story-heading > p { margin: 0 0 4px; font-size: 17px; line-height: 1.5; color: var(--ink-2); max-width: 460px; min-height: 51px; }
+.story-heading > p:empty { display: none; }
 .device-space { width: 100%; display: flex; justify-content: center; }
 
 /* 画布是一整块 1512 × 982 的 Mac 屏幕，画框只露出右上角（比例 719:395，与实机截图一致），左边和下边渐隐 */
@@ -366,6 +367,15 @@ summary::-webkit-details-marker { display: none; }
 .edit-dialog.is-entering { animation: dialog-appear .26s cubic-bezier(.2,.8,.2,1) both; }
 
 /* ---------- 适配 ---------- */
+@media (min-width: 761px) and (max-height: 900px) {
+  .story-stage { padding-block: 24px 72px; }
+  .story-heading { gap: 24px; min-height: 78px; margin-bottom: 18px; }
+  .story-heading h2 { font-size: clamp(32px, 4.25svh, 38px); }
+  .story-heading > p { font-size: 16px; min-height: 48px; }
+  .demo-toolbar { margin-top: 14px; }
+  .story-scroll-hint { margin-top: 10px; }
+}
+
 @media (max-width: 1000px) {
   .site-header nav { gap: 22px; }
   .bento { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -442,7 +452,7 @@ summary::-webkit-details-marker { display: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .story { height: auto; min-height: 0; }
-  .story-stage { position: relative; top: auto; min-height: 0; height: auto; padding-block: 35px; --frame-w: min(100%, 1180px); }
+  .story-stage { position: relative; top: auto; min-height: 0; height: auto; padding-block: 35px; }
   .screen-corner { transform: none !important; }
   .demo-cursor, .story-scroll-hint { display: none; }
 }

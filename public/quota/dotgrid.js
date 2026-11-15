@@ -8,7 +8,7 @@
 precision highp float;
 layout(location = 0) in vec2 aCorner;
 layout(location = 1) in vec4 aMotion;
-layout(location = 2) in vec2 aState;
+layout(location = 2) in vec3 aState;
 uniform vec2 uResolution;
 uniform float uSize;
 uniform float uSwell;
@@ -19,6 +19,7 @@ out vec2 vPoint;
 out float vLength;
 out float vRadius;
 out float vEnergy;
+out float vVisibility;
 void main() {
   float energy = aState.x;
   float radius = 0.5 * uSize * aState.y * (1.0 + uSwell * energy);
@@ -36,6 +37,7 @@ void main() {
   vLength = halfLength;
   vRadius = radius;
   vEnergy = energy;
+  vVisibility = aState.z;
   vec2 clip = point / uResolution * 2.0 - 1.0;
   gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
 }`;
@@ -47,6 +49,7 @@ in vec2 vPoint;
 in float vLength;
 in float vRadius;
 in float vEnergy;
+in float vVisibility;
 uniform vec2 uResolution;
 uniform vec3 uBase;
 uniform vec3 uActive;
@@ -78,7 +81,7 @@ void main() {
     vec2 edge = min(vPoint, uResolution - vPoint) / (uFade * 0.4 * min(uResolution.x, uResolution.y));
     fade = smootherstep01(edge.x) * smootherstep01(edge.y);
   }
-  alpha *= uOpacity * fade;
+  alpha *= uOpacity * fade * vVisibility;
   outColor = vec4(color * alpha, alpha);
 }`;
 
@@ -98,8 +101,9 @@ void main() {
     shape: 'circle', fade: 0, opacity: 1, intro: true, mouseInteraction: true, clickShock: true, paused: false, dpr: undefined,
     // Site addition: dots right under these elements are not drawn, so text on top stays readable.
     // The field itself keeps moving there, so every dot you can see still reacts to the mouse.
+    // quietSoft: of those, the ones that keep a dimmed dot field under the text.
     // quietWhole: of those, the ones that hide dots across their whole box (moving or opaque content).
-    quiet: '', quietWhole: '', quietPad: 6, quietFeather: 22
+    quiet: '', quietSoft: '', quietWhole: '', quietPad: 6, quietFeather: 22
   };
 
   window.createDotGrid = (canvas, options = {}) => {
@@ -125,10 +129,10 @@ void main() {
     const instanceBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 28, 0);
     gl.vertexAttribDivisor(1, 1);
     gl.enableVertexAttribArray(2);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 24, 16);
+    gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 28, 16);
     gl.vertexAttribDivisor(2, 1);
     gl.bindVertexArray(null);
 
@@ -149,10 +153,11 @@ void main() {
       for (const element of quietElements) {
         const box = element.getBoundingClientRect();
         if (!box.width || !box.height) continue;
+        const suppression = s.quietSoft && element.matches(s.quietSoft) ? 0.55 : 1;
         const add = r => {
           const left = Math.max(box.left, r.left); const top = Math.max(box.top, r.top);
           const right = Math.min(box.right, r.right); const bottom = Math.min(box.bottom, r.bottom);
-          if (right > left && bottom > top) inkZones.push([left + sx, top + sy, right + sx, bottom + sy]);
+          if (right > left && bottom > top) inkZones.push([left + sx, top + sy, right + sx, bottom + sy, suppression]);
         };
         if ((s.quietWhole && element.matches(s.quietWhole)) || isSolid(getComputedStyle(element))) { add(box); continue; }
         const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, node => {
@@ -172,17 +177,17 @@ void main() {
       quietKey = key;
       const pad = s.quietPad; const feather = Math.max(1, s.quietFeather); const zones = [];
       const ox = window.scrollX + view.left; const oy = window.scrollY + view.top;
-      for (const [l, t, r, b] of inkZones) {
+      for (const [l, t, r, b, suppression] of inkZones) {
         const left = l - ox - pad; const top = t - oy - pad; const right = r - ox + pad; const bottom = b - oy + pad;
         if (bottom < -feather || top > view.height + feather || right < -feather || left > view.width + feather) continue;
-        zones.push([left, top, right, bottom]);
+        zones.push([left, top, right, bottom, suppression]);
       }
       for (let i = 0; i < grid.count; i++) {
         const x = rest[i * 2]; const y = rest[i * 2 + 1]; let quiet = 0;
-        for (const [left, top, right, bottom] of zones) {
+        for (const [left, top, right, bottom, suppression] of zones) {
           const dx = Math.max(left - x, 0, x - right); const dy = Math.max(top - y, 0, y - bottom);
           if (dx > feather || dy > feather) continue;
-          const value = 1 - smootherstep(Math.hypot(dx, dy) / feather);
+          const value = suppression * (1 - smootherstep(Math.hypot(dx, dy) / feather));
           if (value > quiet) { quiet = value; if (quiet >= 1) break; }
         }
         calm[i] = 1 - quiet;
@@ -203,7 +208,7 @@ void main() {
       const count = cols * rows;
       rest = new Float32Array(count * 2); offset = new Float32Array(count * 2); velocity = new Float32Array(count * 2);
       force = new Float32Array(count * 2); next = new Float32Array(count * 2); wave = new Float32Array(count * 4);
-      energy = new Float32Array(count); instances = new Float32Array(count * 6); calm = new Float32Array(count).fill(1);
+      energy = new Float32Array(count); instances = new Float32Array(count * 7); calm = new Float32Array(count).fill(1);
       inkDirty = true; quietKey = '';
       for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
         const index = (row * cols + col) * 2;
@@ -315,10 +320,10 @@ void main() {
           scale = appear >= 1 ? 1 : Math.max(0, backOut(appear));
           glowing = Math.max(glowing, Math.sin(appear * Math.PI) * 0.6);
         }
-        const target = i * 6;
+        const target = i * 7;
         instances[target] = x; instances[target + 1] = y;
         instances[target + 2] = velocity[index] + wave[source + 2]; instances[target + 3] = velocity[index + 1] + wave[source + 3];
-        instances[target + 4] = glowing; instances[target + 5] = scale * shown;
+        instances[target + 4] = glowing; instances[target + 5] = scale; instances[target + 6] = shown;
       }
       const base = toRgb(s.baseColor); const accent = toRgb(s.activeColor);
       gl.viewport(0, 0, canvas.width, canvas.height);
