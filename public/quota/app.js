@@ -686,12 +686,17 @@
   }
   // Dot field behind the whole page: React Bits DotGrid (dotgrid.js), tuned for the light Apple palette.
   if (window.createDotGrid) {
-    const demoText = '.story-heading-main, #chapter-description, .demo-note, .chapter-controls, .demo-mode-controls, .story-scroll-hint';
+    const softQuiet = [
+      '.story-heading-main, #chapter-description, .demo-note, .chapter-controls, .demo-mode-controls, .story-scroll-hint',
+      '.quiet-section > .section-kicker, .quiet-section > h2',
+      '.setup-copy > .section-kicker, .setup-copy > h2, .setup-copy > p, .preview-caption',
+      '.support-header > *, .marquee-note, .site-footer > *'
+    ].join(', ');
     window.createDotGrid($('.page-dots'), {
       dotSize: 4, gap: 14, baseColor: '#c7c7cc', activeColor: '#0071e3',
       proximity: 140, shockRadius: 320, shockStrength: 5, returnDuration: 0.8,
-      quiet: demoText + ', .screen-corner, .quiet-section > .section-kicker, .quiet-section > h2, .bento > article, .setup-copy, .setup-preview-wrap, .support-header > *, .provider-marquee, .marquee-note, .support-details, .site-footer > *',
-      quietSoft: demoText,
+      quiet: softQuiet + ', .screen-corner, .bento > article, .setup-steps, .setup-preview, .provider-marquee, .support-details',
+      quietSoft: softQuiet,
       quietWhole: '.screen-corner, .provider-marquee'
     });
   }
