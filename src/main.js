@@ -148,12 +148,16 @@ hero.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeo
 scene.add(hero);
 extras.home.push([hero.position, 2.2]);
 
-// 02 作品：三张都在整理中
+// 02 作品：Case 02 打开 Quota Board 功能演示。
 card('work', {
   w: 8, h: 5.25, at: at('work', -1.5, 0.4, 1.2), glow: '#a78bfa', soon: true,
   tex: makeCaseTexture({ label: 'CASE 01', title: '作品整理中', sub: '很快上线', cta: '整理中 · Soon' }),
 });
-card('work', { w: 4.4, h: 2.9, at: at('work', 6.4, 1.75, -0.8), rotY: -0.16, glow: '#6b7bd6', dim: true, soon: true, tex: makeCaseTexture({ label: 'CASE 02', title: '下一个案例', sub: '正在整理', dim: true }) });
+const quotaCard = card('work', {
+  w: 4.4, h: 2.9, at: at('work', 6.4, 1.75, -0.8), rotY: -0.16, glow: '#7dd3fc',
+  tex: makeCaseTexture({ label: 'CASE 02', title: 'Quota Board', sub: 'Mac 菜单栏额度工具', image: '/quota/assets/icons/app-icon.svg', cta: '查看演示 →' }),
+});
+quotaCard.href = '/quota/';
 card('work', { w: 4.4, h: 2.9, at: at('work', 6.4, -1.65, -0.8), rotY: -0.16, glow: '#6b7bd6', dim: true, soon: true, tex: makeCaseTexture({ label: 'CASE 03', title: '下一个案例', sub: '正在整理', dim: true }) });
 
 // 03 过程

@@ -1,0 +1,20 @@
+Quota Board website assets
+
+The product interface is based on the user's Figma design:
+https://www.figma.com/design/F3YxSt1aBulzCUxZE6ELzv
+
+Provider icons are from Lobe Icons as used by the application and Figma design.
+See LobeIcons-LICENSE.txt in this directory.
+
+The Apple mark is sourced from Simple Icons:
+https://github.com/simple-icons/simple-icons/blob/develop/icons/apple.svg
+https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md
+
+GSAP and ScrollTrigger, pinned to version 3.15.1:
+https://gsap.com/standard-license/
+
+All account names, email addresses and quota readings in this website are illustrative.
+
+- assets/menu/: Framework7 Icons 5.0.5 (MIT), see assets/menu/Framework7-Icons-LICENSE.txt
+- assets/brands/: Lobe Icons static SVG (MIT), see assets/LobeIcons-LICENSE.txt. Brand names and logos belong to their owners.
+- dotgrid.js: plain-JS port of React Bits "DotGrid" (https://reactbits.dev/backgrounds/dot-grid), source https://github.com/DavidHDev/react-bits, MIT + Commons Clause.

@@ -1,0 +1,2 @@
+# Keep the approved static Quota website byte-for-byte across platforms.
+public/quota/** -text
