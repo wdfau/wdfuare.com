@@ -7,7 +7,7 @@
   <meta name="description" content="Quota Board 额度看板，将 Codex、Kiro、Cursor、Claude 与 GitHub Copilot 的账号额度收进 Mac 菜单栏，看演示，再亲手试试">
   <title>Quota Board — All usage, at a glimpse.</title>
   <link rel="icon" href="assets/icons/app-icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=8a5027bd9d18">
+  <link rel="stylesheet" href="styles.css?v=47024b5f1535">
   
   
   <script src="dotgrid.js" defer></script>
@@ -19,7 +19,7 @@
   <header class="site-header">
     <a class="wordmark" href="#top" aria-label="Quota Board 首页"><img class="app-icon" src="assets/icons/app-icon.svg" alt="" width="28" height="28">Quota Board<span class="wordmark-suffix">for Mac</span></a>
     <nav aria-label="主导航"><a href="#demo">功能演示</a><a href="#setup">开始使用</a><a href="https://github.com/wdfau/quota-board" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></nav>
-    <a class="header-download" href="#download">下载应用 <span aria-hidden="true">↘</span></a>
+    <a class="header-download" href="#download">下载应用 <img class="download-icon" src="assets/icons/download.svg" width="16" height="16" alt=""></a>
   </header>
 
   <main id="main">
@@ -27,7 +27,7 @@
       <div class="release-label"><span class="live-dot"></span>你的 Mac 菜单栏，多一份从容</div>
       <h1 id="hero-title" lang="en"><span class="hero-line">All usage,</span> <span class="hero-line">at a glimpse.</span></h1>
       <p class="hero-description">多个平台，多个账号，把剩余额度和重置时间，<br class="desktop-break">收进右上角的一小块空间</p>
-      <div class="hero-actions"><a class="button button-dark" href="#download">获取预览版 <span aria-hidden="true">↘</span></a><a class="text-link" href="#demo">滚动探索 <span class="down-arrow" aria-hidden="true">↓</span></a></div>
+      <div class="hero-actions"><a class="button button-dark" href="#download">获取预览版 <img class="download-icon" src="assets/icons/download.svg" width="16" height="16" alt=""></a><a class="text-link" href="#demo">滚动探索 <span class="down-arrow" aria-hidden="true">↓</span></a></div>
       <p class="hero-meta">原生 macOS 应用 <span>·</span> Apple Silicon <span>·</span> v1.5.7</p>
     </section>
 
@@ -98,20 +98,24 @@
           <div class="download-option">
             <a class="button button-dark" href="https://github.com/wdfau/quota-board/releases/tag/macos-v1.5.7" target="_blank" rel="noopener noreferrer" aria-describedby="download-mac-meta">
               <img class="download-platform-icon is-apple" src="assets/icons/apple.svg" width="16" height="16" alt="">
-              <span>下载 Mac<span class="download-label-suffix"> 预览版</span></span><span class="download-arrow" aria-hidden="true">↗</span>
+              <span>下载 Mac<span class="download-label-suffix"> 预览版</span></span><img class="download-icon" src="assets/icons/download.svg" width="16" height="16" alt="">
             </a>
             <p class="download-meta" id="download-mac-meta">v1.5.7 · macOS 26+ · Apple Silicon</p>
           </div>
           <div class="download-option">
             <a class="button button-dark" href="https://github.com/wdfau/quota-board/releases/download/windows-v1.0.0/QuotaBoard-windows-x64-1.0.0.zip" target="_blank" rel="noopener noreferrer" aria-describedby="download-windows-meta">
               <svg class="download-platform-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M0 0h7.5v7.5H0zm8.5 0H16v7.5H8.5zM0 8.5h7.5V16H0zm8.5 0H16V16H8.5z"/></svg>
-              <span>下载 Windows<span class="download-label-suffix"> 预览版</span></span><span class="download-arrow" aria-hidden="true">↗</span>
+              <span>下载 Windows<span class="download-label-suffix"> 预览版</span></span><img class="download-icon" src="assets/icons/download.svg" width="16" height="16" alt="">
             </a>
             <p class="download-meta" id="download-windows-meta">v1.0.0 · Windows 11 · x64</p>
           </div>
         </div>
         <details class="install-details">
-          <summary>安装说明与预览状态 <span aria-hidden="true">⌄</span></summary>
+          <summary>
+            <svg class="install-details-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 1.75h4.75L12 5v8.25a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2.75a1 1 0 0 1 1-1Z"/><path d="M8.75 1.75V5H12M5.5 8h4m-4 2.5h4"/></svg>
+            安装与预览说明
+            <svg class="install-details-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg>
+          </summary>
           <p>下载需要登录有仓库访问权限的 GitHub 账号。</p>
           <p><strong>Mac</strong> 下载并解压，打开「额度看板.app」。应用使用系统的 <code>/usr/bin/python3</code> 读取用量。预览包采用本地签名，尚未经过 Apple 公证。</p>
           <p><strong>Windows</strong> 解压整个文件夹，双击 <code>Quota Board.exe</code>，之后可从任务栏通知区域打开额度看板。</p>

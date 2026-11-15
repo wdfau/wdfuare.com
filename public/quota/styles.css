@@ -47,8 +47,7 @@ img { display: block; }
 .site-header nav { display: flex; gap: 32px; font-size: 14px; }
 .site-header nav a { color: rgba(29,29,31,.8); transition: color .2s; }
 .site-header nav a:hover { color: var(--ink); }
-.header-download { font-size: 13px; font-weight: 500; padding: 7px 15px; border-radius: 980px; background: var(--blue); color: #fff; transition: background .2s; white-space: nowrap; }
-.header-download span { margin-left: 6px; }
+.header-download { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; padding: 7px 15px; border-radius: 980px; background: var(--blue); color: #fff; transition: background .2s; white-space: nowrap; }
 .header-download:hover { background: #0077ed; }
 
 /* ---------- 首屏 ---------- */
@@ -62,6 +61,7 @@ img { display: block; }
 .button-dark { color: #fff; background: var(--blue); }
 .button-dark:hover { background: #0077ed; }
 .button:active { transform: scale(.98); }
+.download-icon { width: 16px; height: 16px; flex: 0 0 16px; }
 .apple-symbol { display: inline-flex; width: 16px; height: 19px; font-size: 0; flex-shrink: 0; background: url("assets/icons/apple.svg") center / contain no-repeat; }
 .button-dark .apple-symbol { filter: invert(1); }
 .text-link { font-size: 17px; color: var(--link); }
@@ -328,7 +328,27 @@ summary::-webkit-details-marker { display: none; }
 .download-platform-icon.is-apple { filter: invert(1); }
 .download-meta { font-size: 14px; line-height: 1.4; color: #a1a1a6; margin: 12px 0 0; }
 .install-details { max-width: 540px; margin-inline: auto; }
-.install-details summary { display: inline-flex; gap: 8px; font-size: 15px; color: #2997ff; padding: 6px; }
+.install-details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 980px;
+  background: rgba(255,255,255,.055);
+  color: #f5f5f7;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background .2s, border-color .2s;
+}
+.install-details > summary:hover, .install-details[open] > summary {
+  border-color: rgba(255,255,255,.25);
+  background: rgba(255,255,255,.1);
+}
+.install-details-icon, .install-details-chevron { display: block; flex: none; color: #a1a1a6; }
+.install-details-chevron { margin-left: 2px; transition: transform .2s; }
+.install-details[open] .install-details-chevron { transform: rotate(180deg); }
 .install-details p { font-size: 15px; line-height: 1.6; color: #a1a1a6; text-align: left; }
 .install-details code { background: #1d1d1f; color: #f5f5f7; padding: 1px 6px; border-radius: 5px; font-size: 13px; }
 .install-details > a { font-size: 15px; color: #2997ff; }
@@ -415,7 +435,7 @@ summary::-webkit-details-marker { display: none; }
 @media (max-width: 540px) {
   .download-options { gap: 8px; }
   .download-option .button { gap: 6px; padding-inline: 6px; font-size: 14px; }
-  .download-label-suffix, .download-arrow { display: none; }
+  .download-label-suffix, .download-option .download-icon { display: none; }
   .download-meta { font-size: 12px; }
 }
 @media (max-width: 360px) {
