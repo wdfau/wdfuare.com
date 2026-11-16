@@ -103,7 +103,7 @@ void main() {
     // The field itself keeps moving there, so every dot you can see still reacts to the mouse.
     // quietSoft: of those, the ones that keep a dimmed dot field under the text.
     // quietWhole: of those, the ones that hide dots across their whole box (moving or opaque content).
-    quiet: '', quietSoft: '', quietWhole: '', quietPad: 6, quietFeather: 22
+    quiet: '', quietSoft: '', quietWhole: '', quietPad: 6, quietFeather: 22, ignoreInteraction: ''
   };
 
   window.createDotGrid = (canvas, options = {}) => {
@@ -138,7 +138,7 @@ void main() {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const view = { width: 0, height: 0, left: 0, top: 0, ratio: 1 };
-    const grid = { count: 0, cols: 1, rows: 1, cell: 1, centerX: 0, centerY: 0, reach: 1 };
+    const grid = { count: 0, cols: 1, rows: 1, cell: 1, startY: 0, scrollY: null, firstRow: 0, centerX: 0, centerY: 0, reach: 1 };
     let rest = new Float32Array(0); let offset = new Float32Array(0); let velocity = new Float32Array(0);
     let force = new Float32Array(0); let next = new Float32Array(0); let wave = new Float32Array(0);
     let energy = new Float32Array(0); let instances = new Float32Array(0); let calm = new Float32Array(0);
@@ -198,13 +198,44 @@ void main() {
     let introStart = s.intro && !reduced ? -1 : null;
     let visible = true; let raf = 0; let last = 0;
 
+    const scrollGrid = () => {
+      const scrollY = window.scrollY;
+      if (scrollY === grid.scrollY) return;
+      const firstRow = Math.floor(scrollY / grid.cell);
+      const phase = scrollY - firstRow * grid.cell;
+      const rowDelta = firstRow - grid.firstRow;
+      grid.scrollY = scrollY;
+      grid.firstRow = firstRow;
+
+      // Keep the motion of dots that stay in view and reset only the rows that enter.
+      if (rowDelta) {
+        const shift = Math.min(grid.rows, Math.abs(rowDelta)) * grid.cols * 2;
+        for (const values of [offset, velocity]) {
+          if (rowDelta > 0) {
+            values.copyWithin(0, shift);
+            values.fill(0, values.length - shift);
+          } else {
+            values.copyWithin(shift, 0, values.length - shift);
+            values.fill(0, 0, shift);
+          }
+        }
+      }
+      for (let row = 0; row < grid.rows; row++) {
+        const y = grid.startY + row * grid.cell - phase;
+        for (let col = 0; col < grid.cols; col++) {
+          rest[(row * grid.cols + col) * 2 + 1] = y;
+        }
+      }
+    };
+
     const rebuild = () => {
       const size = s.dotSize; const spacing = s.gap;
       const cell = Math.max(2, size + spacing);
       const cols = Math.max(1, Math.floor((view.width + spacing) / cell));
-      const rows = Math.max(1, Math.floor((view.height + spacing) / cell));
+      const visibleRows = Math.max(1, Math.floor((view.height + spacing) / cell));
+      const rows = visibleRows + 2;
       const startX = (view.width - (cols * cell - spacing)) / 2 + size / 2;
-      const startY = (view.height - (rows * cell - spacing)) / 2 + size / 2;
+      const startY = (view.height - (visibleRows * cell - spacing)) / 2 + size / 2 - cell;
       const count = cols * rows;
       rest = new Float32Array(count * 2); offset = new Float32Array(count * 2); velocity = new Float32Array(count * 2);
       force = new Float32Array(count * 2); next = new Float32Array(count * 2); wave = new Float32Array(count * 4);
@@ -212,9 +243,13 @@ void main() {
       inkDirty = true; quietKey = '';
       for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
         const index = (row * cols + col) * 2;
-        rest[index] = startX + col * cell; rest[index + 1] = startY + row * cell;
+        rest[index] = startX + col * cell;
       }
-      Object.assign(grid, { count, cols, rows, cell, centerX: view.width / 2, centerY: view.height / 2, reach: Math.hypot(view.width, view.height) / 2 });
+      Object.assign(grid, {
+        count, cols, rows, cell, startY, scrollY: null, firstRow: Math.floor(window.scrollY / cell),
+        centerX: view.width / 2, centerY: view.height / 2, reach: Math.hypot(view.width, view.height) / 2
+      });
+      scrollGrid();
       gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, instances.byteLength, gl.DYNAMIC_DRAW);
     };
@@ -232,7 +267,7 @@ void main() {
       const active = shocks.map(shock => {
         const front = ((now - shock.start) / 1000) * travel;
         const power = smootherstep(1 - front / Math.max(1, s.shockRadius));
-        return { ...shock, front, amplitude: power * s.shockStrength * grid.cell * 0.24 * motion };
+        return { ...shock, y: shock.y - grid.scrollY, front, amplitude: power * s.shockStrength * grid.cell * 0.24 * motion };
       });
       const coupling = (Math.max(0, s.tension) * 900) ** 2 / (grid.cell * grid.cell);
       const viscosity = Math.sqrt(coupling) * 0.06;
@@ -363,6 +398,7 @@ void main() {
       if (introStart !== null && introStart < 0) introStart = now;
       const dt = Math.min(0.05, (now - last) / 1000 || 0);
       last = now;
+      scrollGrid();
       step(dt, now); render(now);
       if (!settled(now)) raf = requestAnimationFrame(frame);
     };
@@ -378,10 +414,15 @@ void main() {
     };
     const locate = event => { const rect = canvas.getBoundingClientRect(); view.left = rect.left; view.top = rect.top; return [event.clientX - rect.left, event.clientY - rect.top]; };
 
+    const interactive = 'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], [contenteditable]:not([contenteditable="false"])';
+    const blocksInteraction = element => element instanceof Element && (
+      element.closest(interactive) || (s.ignoreInteraction && element.closest(s.ignoreInteraction))
+    );
+
     const onMove = event => {
       if (!s.mouseInteraction) return;
       const [x, y] = locate(event);
-      const inside = x >= 0 && y >= 0 && x <= view.width && y <= view.height;
+      const inside = x >= 0 && y >= 0 && x <= view.width && y <= view.height && !blocksInteraction(event.target);
       const time = event.timeStamp || performance.now();
       if (inside && pointer.inside && pointer.time) {
         const elapsed = Math.max(4, time - pointer.time) / 1000;
@@ -394,10 +435,10 @@ void main() {
     const onLeave = () => { pointer.inside = false; pointer.time = 0; wake(); };
     const onOut = event => { if (!event.relatedTarget) onLeave(); };
     const onDown = event => {
-      if (!s.clickShock || reduced) return;
+      if (!s.clickShock || reduced || event.button !== 0 || blocksInteraction(event.target)) return;
       const [x, y] = locate(event);
       if (x < 0 || y < 0 || x > view.width || y > view.height) return;
-      shocks.push({ x, y, start: performance.now() });
+      shocks.push({ x, y: y + window.scrollY, start: performance.now() });
       if (shocks.length > 6) shocks.shift();
       wake();
     };
@@ -406,11 +447,14 @@ void main() {
     window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointerout', onOut);
     window.addEventListener('blur', onLeave);
+    window.addEventListener('scroll', () => {
+      if (pointer.inside && blocksInteraction(document.elementFromPoint(pointer.x + view.left, pointer.y + view.top))) onLeave();
+      wake();
+    }, { passive: true });
     new ResizeObserver(() => { resize(); wake(); }).observe(canvas);
     // Text moves on scroll and changes between chapters; redraw so the gaps under it follow.
     if (quietElements.length) {
       const remeasure = () => { inkDirty = true; wake(); };
-      window.addEventListener('scroll', wake, { passive: true });
       const follow = new ResizeObserver(remeasure); const changed = new MutationObserver(remeasure);
       follow.observe(document.body);
       for (const element of quietElements) { follow.observe(element); changed.observe(element, { childList: true, characterData: true, subtree: true }); }

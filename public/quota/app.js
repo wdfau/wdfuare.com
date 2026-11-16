@@ -697,7 +697,8 @@
       proximity: 140, shockRadius: 320, shockStrength: 5, returnDuration: 0.8,
       quiet: softQuiet + ', .screen-corner, .bento > article, .setup-steps, .setup-preview, .provider-marquee, .support-details',
       quietSoft: softQuiet,
-      quietWhole: '.screen-corner, .provider-marquee'
+      quietWhole: '.screen-corner, .provider-marquee',
+      ignoreInteraction: '.site-header, .screen-corner, .chapter-controls, .bento > article, .setup-steps, .setup-preview, .provider-marquee, .support-details, .download-section'
     });
   }
 
