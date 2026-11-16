@@ -695,6 +695,9 @@
     window.createDotGrid($('.page-dots'), {
       dotSize: 4, gap: 14, baseColor: '#c7c7cc', activeColor: '#0071e3',
       proximity: 140, shockRadius: 320, shockStrength: 5, returnDuration: 0.8,
+      // The dots scroll with the page. Pressing a button, a link or one of the demo screens makes no ripple.
+      scroll: true,
+      shockIgnore: 'a, button, input, select, textarea, label, summary, [role="button"], .screen-corner, .setup-preview',
       quiet: softQuiet + ', .screen-corner, .bento > article, .setup-steps, .setup-preview, .provider-marquee, .support-details',
       quietSoft: softQuiet,
       quietWhole: '.screen-corner, .provider-marquee'

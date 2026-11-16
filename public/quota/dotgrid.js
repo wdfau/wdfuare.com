@@ -103,7 +103,11 @@ void main() {
     // The field itself keeps moving there, so every dot you can see still reacts to the mouse.
     // quietSoft: of those, the ones that keep a dimmed dot field under the text.
     // quietWhole: of those, the ones that hide dots across their whole box (moving or opaque content).
-    quiet: '', quietSoft: '', quietWhole: '', quietPad: 6, quietFeather: 22
+    quiet: '', quietSoft: '', quietWhole: '', quietPad: 6, quietFeather: 22,
+    // Site addition: scroll pins the dots to the page, so they move with it, and a pointer held still
+    // while the page scrolls still parts the dots that pass under it.
+    // shockIgnore: a press that starts on these elements (buttons, links, the demo screens) makes no ripple.
+    scroll: false, shockIgnore: ''
   };
 
   window.createDotGrid = (canvas, options = {}) => {
@@ -138,7 +142,7 @@ void main() {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const view = { width: 0, height: 0, left: 0, top: 0, ratio: 1 };
-    const grid = { count: 0, cols: 1, rows: 1, cell: 1, centerX: 0, centerY: 0, reach: 1 };
+    const grid = { count: 0, cols: 1, rows: 1, cell: 1, centerX: 0, centerY: 0, reach: 1, startY: 0, firstRow: 0, scrollY: 0 };
     let rest = new Float32Array(0); let offset = new Float32Array(0); let velocity = new Float32Array(0);
     let force = new Float32Array(0); let next = new Float32Array(0); let wave = new Float32Array(0);
     let energy = new Float32Array(0); let instances = new Float32Array(0); let calm = new Float32Array(0);
@@ -194,29 +198,58 @@ void main() {
       }
     };
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, time: 0, inside: false, presence: 0 };
+    // How fast the page is scrolling, in the same units as the pointer's speed. Only used in scroll mode.
+    const flow = { y: 0, vy: 0, time: 0 };
     const shocks = [];
     let introStart = s.intro && !reduced ? -1 : null;
     let visible = true; let raf = 0; let last = 0;
+
+    // Buffer row 0 holds page row grid.firstRow. Without scroll mode that is always row 0 and the grid never moves.
+    const firstRowAt = y => s.scroll ? Math.floor((y - grid.startY) / grid.cell) - 1 : 0;
+    const placeRows = () => {
+      const top = grid.startY + grid.firstRow * grid.cell - (s.scroll ? grid.scrollY : 0);
+      for (let row = 0; row < grid.rows; row++) for (let col = 0; col < grid.cols; col++) rest[(row * grid.cols + col) * 2 + 1] = top + row * grid.cell;
+    };
 
     const rebuild = () => {
       const size = s.dotSize; const spacing = s.gap;
       const cell = Math.max(2, size + spacing);
       const cols = Math.max(1, Math.floor((view.width + spacing) / cell));
-      const rows = Math.max(1, Math.floor((view.height + spacing) / cell));
+      const fit = Math.max(1, Math.floor((view.height + spacing) / cell));
+      // Pinned to the page, the grid keeps a spare row past each edge of the screen, so scrolling never shows a gap.
+      const rows = s.scroll ? Math.ceil(view.height / cell) + 3 : fit;
       const startX = (view.width - (cols * cell - spacing)) / 2 + size / 2;
-      const startY = (view.height - (rows * cell - spacing)) / 2 + size / 2;
+      const startY = (view.height - (fit * cell - spacing)) / 2 + size / 2;
       const count = cols * rows;
       rest = new Float32Array(count * 2); offset = new Float32Array(count * 2); velocity = new Float32Array(count * 2);
       force = new Float32Array(count * 2); next = new Float32Array(count * 2); wave = new Float32Array(count * 4);
       energy = new Float32Array(count); instances = new Float32Array(count * 7); calm = new Float32Array(count).fill(1);
       inkDirty = true; quietKey = '';
-      for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
-        const index = (row * cols + col) * 2;
-        rest[index] = startX + col * cell; rest[index + 1] = startY + row * cell;
-      }
-      Object.assign(grid, { count, cols, rows, cell, centerX: view.width / 2, centerY: view.height / 2, reach: Math.hypot(view.width, view.height) / 2 });
+      Object.assign(grid, { count, cols, rows, cell, startY, centerX: view.width / 2, centerY: view.height / 2, reach: Math.hypot(view.width, view.height) / 2 });
+      grid.scrollY = s.scroll ? window.scrollY : 0; grid.firstRow = firstRowAt(grid.scrollY);
+      for (let i = 0; i < count; i++) rest[i * 2] = startX + (i % cols) * cell;
+      placeRows();
       gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, instances.byteLength, gl.DYNAMIC_DRAW);
+    };
+
+    // Scroll mode: follow the page. Rows that leave one edge come back at the other edge at rest,
+    // and every dot still on screen keeps its own motion, so nothing jumps while it settles.
+    const followPage = () => {
+      if (!s.scroll || window.scrollY === grid.scrollY) return;
+      grid.scrollY = window.scrollY;
+      const first = firstRowAt(grid.scrollY); const shift = first - grid.firstRow;
+      if (shift) {
+        const keep = grid.rows - Math.abs(shift);
+        for (const [array, stride, blank] of [[offset, 2, 0], [velocity, 2, 0], [energy, 1, 0], [calm, 1, 1]]) {
+          const width = grid.cols * stride;
+          if (keep <= 0) array.fill(blank);
+          else if (shift > 0) { array.copyWithin(0, shift * width); array.fill(blank, keep * width); }
+          else { array.copyWithin(-shift * width, 0, keep * width); array.fill(blank, 0, -shift * width); }
+        }
+        grid.firstRow = first;
+      }
+      placeRows();
     };
 
     const step = (dt, now) => {
@@ -225,14 +258,18 @@ void main() {
       const omega = 4 / (zeta * Math.max(0.2, s.returnDuration));
       const stiffness = omega * omega; const damping = 2 * zeta * omega;
       const radius = Math.max(1, s.proximity);
-      const speed = Math.hypot(pointer.vx, pointer.vy);
+      // While the page scrolls, pinned dots slide under the pointer, so it moves through them even when held still.
+      const moveX = pointer.vx; const moveY = pointer.vy + flow.vy;
+      const speed = Math.hypot(moveX, moveY);
       const drive = s.mouseInteraction && pointer.inside ? 6500 * Math.tanh(speed / 900) * s.strength * motion : 0;
-      const dirX = speed > 0.001 ? pointer.vx / speed : 0; const dirY = speed > 0.001 ? pointer.vy / speed : 0;
+      const dirX = speed > 0.001 ? moveX / speed : 0; const dirY = speed > 0.001 ? moveY / speed : 0;
       const width = grid.cell * 1.4; const travel = 650;
+      // In scroll mode a ripple is kept in page coordinates, so it travels with the page too.
+      const lift = s.scroll ? grid.scrollY : 0;
       const active = shocks.map(shock => {
         const front = ((now - shock.start) / 1000) * travel;
         const power = smootherstep(1 - front / Math.max(1, s.shockRadius));
-        return { ...shock, front, amplitude: power * s.shockStrength * grid.cell * 0.24 * motion };
+        return { ...shock, y: shock.y - lift, front, amplitude: power * s.shockStrength * grid.cell * 0.24 * motion };
       });
       const coupling = (Math.max(0, s.tension) * 900) ** 2 / (grid.cell * grid.cell);
       const viscosity = Math.sqrt(coupling) * 0.06;
@@ -295,7 +332,7 @@ void main() {
       }
       for (let i = shocks.length - 1; i >= 0; i--) if (active[i].front > s.shockRadius + width * 3) shocks.splice(i, 1);
       const decay = 1 - Math.exp(-dt / 0.08);
-      pointer.vx -= pointer.vx * decay; pointer.vy -= pointer.vy * decay;
+      pointer.vx -= pointer.vx * decay; pointer.vy -= pointer.vy * decay; flow.vy -= flow.vy * decay;
       const presenceTarget = s.mouseInteraction && pointer.inside ? 1 : 0;
       pointer.presence += (presenceTarget - pointer.presence) * (1 - Math.exp(-dt / 0.2));
     };
@@ -350,7 +387,7 @@ void main() {
     const settled = now => {
       if (shocks.length) return false;
       if (introStart !== null) { if (introStart < 0 || (now - introStart) / 1000 < 1.6) return false; introStart = null; }
-      if (Math.abs(pointer.vx) + Math.abs(pointer.vy) > 1) return false;
+      if (Math.abs(pointer.vx) + Math.abs(pointer.vy) + Math.abs(flow.vy) > 1) return false;
       const presenceTarget = s.mouseInteraction && pointer.inside ? 1 : 0;
       if (Math.abs(presenceTarget - pointer.presence) > 0.002) return false;
       for (let i = 0; i < offset.length; i++) if (Math.abs(offset[i]) > 0.02 || Math.abs(velocity[i]) > 0.5) return false;
@@ -363,7 +400,7 @@ void main() {
       if (introStart !== null && introStart < 0) introStart = now;
       const dt = Math.min(0.05, (now - last) / 1000 || 0);
       last = now;
-      step(dt, now); render(now);
+      followPage(); step(dt, now); render(now);
       if (!settled(now)) raf = requestAnimationFrame(frame);
     };
     const wake = () => { if (raf || s.paused || !visible) return; last = performance.now(); raf = requestAnimationFrame(frame); };
@@ -395,9 +432,10 @@ void main() {
     const onOut = event => { if (!event.relatedTarget) onLeave(); };
     const onDown = event => {
       if (!s.clickShock || reduced) return;
+      if (s.shockIgnore && event.target instanceof Element && event.target.closest(s.shockIgnore)) return;
       const [x, y] = locate(event);
       if (x < 0 || y < 0 || x > view.width || y > view.height) return;
-      shocks.push({ x, y, start: performance.now() });
+      shocks.push({ x, y: y + (s.scroll ? window.scrollY : 0), start: performance.now() });
       if (shocks.length > 6) shocks.shift();
       wake();
     };
@@ -407,10 +445,19 @@ void main() {
     window.addEventListener('pointerout', onOut);
     window.addEventListener('blur', onLeave);
     new ResizeObserver(() => { resize(); wake(); }).observe(canvas);
-    // Text moves on scroll and changes between chapters; redraw so the gaps under it follow.
+    // Scrolling redraws the dots: pinned dots move with the page, and the gaps under text follow it.
+    const onScroll = event => {
+      const time = event.timeStamp || performance.now();
+      const elapsed = (time - flow.time) / 1000;
+      // Within one gesture the speed follows the page the way a pointer's does; a new gesture starts from rest.
+      if (s.scroll && flow.time && elapsed < 0.1) flow.vy += ((window.scrollY - flow.y) / Math.max(0.004, elapsed) - flow.vy) * 0.6;
+      flow.y = window.scrollY; flow.time = time;
+      wake();
+    };
+    if (s.scroll || quietElements.length) window.addEventListener('scroll', onScroll, { passive: true });
+    // Text changes between chapters; redraw so the gaps under it follow.
     if (quietElements.length) {
       const remeasure = () => { inkDirty = true; wake(); };
-      window.addEventListener('scroll', wake, { passive: true });
       const follow = new ResizeObserver(remeasure); const changed = new MutationObserver(remeasure);
       follow.observe(document.body);
       for (const element of quietElements) { follow.observe(element); changed.observe(element, { childList: true, characterData: true, subtree: true }); }

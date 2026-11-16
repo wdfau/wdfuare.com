@@ -223,7 +223,7 @@ img { display: block; }
 .demo-mode-controls { display: flex; align-items: center; gap: 16px; }
 .mode-label { font-size: 14px; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
 .mode-label .live-dot { width: 6px; height: 6px; }
-.try-button, .resume-button { border: 1px solid var(--blue); border-radius: 980px; padding: 8px 18px; background: transparent; font-size: 14px; font-weight: 500; color: var(--blue); transition: background .2s, color .2s; }
+.try-button, .resume-button { border: 1px solid var(--blue); border-radius: 980px; padding: 8px 18px; background: #fff; font-size: 14px; font-weight: 500; color: var(--blue); transition: background .2s, color .2s; }
 .try-button span { margin-left: 6px; }
 .try-button:hover, .resume-button:hover { background: var(--blue); color: #fff; }
 .reset-button { background: transparent; border: 0; color: var(--link); font-size: 14px; padding: 6px 0; }
